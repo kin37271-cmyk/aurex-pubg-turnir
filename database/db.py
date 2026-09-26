@@ -32,6 +32,10 @@ async def init_db():
             await db.execute("ALTER TABLE tournament ADD COLUMN winner_nick TEXT DEFAULT NULL")
         except Exception:
             pass
+        try:
+            await db.execute("ALTER TABLE slots ADD COLUMN receipt_path TEXT DEFAULT NULL")
+        except Exception:
+            pass
         
         # 16 ta Slot jadvali
         await db.execute("""
@@ -250,6 +254,67 @@ async def book_slot(
         await db.commit()
         return True
 
+async def book_slot_pending(
+    slot_number: int,
+    user_id: int,
+    user_name: str,
+    user_username: Optional[str],
+    pubg_nick: str,
+    pubg_id: str,
+    phone: Optional[str] = None,
+    receipt_path: Optional[str] = None
+) -> bool:
+    """Slotni to'lov tekshirilguncha 'pending' holatida band qilish"""
+    async with aiosqlite.connect(DB_PATH) as db:
+        # Avval slot bo'shmi yoki yo'qligini tekshiramiz
+        async with db.execute("SELECT user_id FROM slots WHERE slot_number = ?", (slot_number,)) as cursor:
+            row = await cursor.fetchone()
+            if not row or (row[0] is not None and row[0] != user_id):
+                return False
+
+        # Foydalanuvchi boshqa slot olmaganligini tekshiramiz
+        if user_id and user_id > 0:
+            async with db.execute("SELECT slot_number FROM slots WHERE user_id = ? AND slot_number != ?", (user_id, slot_number)) as cursor:
+                existing = await cursor.fetchone()
+                if existing:
+                    return False
+
+        await db.execute("""
+            UPDATE slots SET 
+                user_id = ?,
+                user_name = ?,
+                user_username = ?,
+                pubg_nick = ?,
+                pubg_id = ?,
+                phone = ?,
+                status = 'pending',
+                receipt_path = ?,
+                registered_at = CURRENT_TIMESTAMP
+            WHERE slot_number = ?
+        """, (user_id, user_name, user_username, pubg_nick, pubg_id, phone, receipt_path, slot_number))
+
+        await db.execute("""
+            INSERT INTO users (user_id, full_name, username, pubg_nick, pubg_id)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                full_name = excluded.full_name,
+                username = excluded.username,
+                pubg_nick = excluded.pubg_nick,
+                pubg_id = excluded.pubg_id
+        """, (user_id, user_name, user_username, pubg_nick, pubg_id))
+
+        await db.commit()
+        return True
+
+async def approve_slot(slot_number: int) -> bool:
+    """Admin to'lovni tasdiqlaganda slot statusini 'active' qilish"""
+    async with aiosqlite.connect(DB_PATH) as db:
+        res = await db.execute("""
+            UPDATE slots SET status = 'active' WHERE slot_number = ?
+        """, (slot_number,))
+        await db.commit()
+        return res.rowcount > 0
+
 async def cancel_slot(slot_number: int, user_id: Optional[int] = None) -> bool:
     """Slotni bo'shatish"""
     async with aiosqlite.connect(DB_PATH) as db:
@@ -263,6 +328,7 @@ async def cancel_slot(slot_number: int, user_id: Optional[int] = None) -> bool:
                     pubg_id = NULL,
                     phone = NULL,
                     status = 'active',
+                    receipt_path = NULL,
                     registered_at = NULL
                 WHERE slot_number = ? AND user_id = ?
             """, (slot_number, user_id))
@@ -276,6 +342,7 @@ async def cancel_slot(slot_number: int, user_id: Optional[int] = None) -> bool:
                     pubg_id = NULL,
                     phone = NULL,
                     status = 'active',
+                    receipt_path = NULL,
                     registered_at = NULL
                 WHERE slot_number = ?
             """, (slot_number,))

@@ -42,10 +42,15 @@ async def main():
     await init_db()
     logger.info("✅ Ma'lumotlar bazasi tayyor!")
 
+    # Bot obyektini yaratish
+    bot_prop = DefaultBotProperties(parse_mode=ParseMode.HTML)
+    aiogram_bot = Bot(token=BOT_TOKEN, default=bot_prop)
+    dp = Dispatcher(storage=MemoryStorage())
+
     # Web App serverini ishga tushirish
     web_port = int(os.getenv("PORT", "8080"))
     logger.info(f"🌐 Web App server ishga tushirilmoqda (port {web_port})...")
-    webapp_runner = await start_webapp_server(host="0.0.0.0", port=web_port)
+    webapp_runner = await start_webapp_server(bot=aiogram_bot, host="0.0.0.0", port=web_port)
     logger.info(f"✅ Web App server tayyor: http://localhost:{web_port}")
 
     # Cloudflare Tunnelni boshqarish
@@ -63,10 +68,6 @@ async def main():
                 if tunnel_url:
                     set_webapp_url(tunnel_url)
                     active_url = tunnel_url
-
-    bot = DefaultBotProperties(parse_mode=ParseMode.HTML)
-    aiogram_bot = Bot(token=BOT_TOKEN, default=bot)
-    dp = Dispatcher(storage=MemoryStorage())
 
     # Botning Tavsifi (Description) va Bio (Short Description) sozlash
     try:

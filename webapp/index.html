@@ -302,10 +302,23 @@
           <h3 id="modal-slot-title">SLOT #01 BAND QILISH</h3>
           <button class="modal-close" id="modal-close-btn">&times;</button>
         </div>
-        <div class="modal-price-box">
-          <span>Slot to'lovi:</span>
-          <strong id="modal-slot-price">0 so'm</strong>
+
+        <!-- PAYMENT CARD BOX -->
+        <div class="modal-card-box">
+          <div class="card-box-header">
+            <span class="card-badge">💳 TO'LOV UCHUN KARTA</span>
+            <span class="card-price-tag">10 000 so'm</span>
+          </div>
+          <div class="card-number-row">
+            <code id="modal-card-num">4198130083012731</code>
+            <button type="button" class="copy-btn" onclick="copyText('modal-card-num', this)">Nusxa olish 📋</button>
+          </div>
+          <div class="card-holder-name">👤 <b>Murodaliyev Abdulaziz</b></div>
+          <p class="card-instruction">
+            ⚠️ <b>100% to'lov shart:</b> Karta raqamiga <b>10 000 so'm</b> o'tkazing va to'lov cheki skrinshotini quyida yuklang!
+          </p>
         </div>
+
         <form id="book-form">
           <input type="hidden" id="modal-slot-num" value="">
           <div class="form-group">
@@ -317,11 +330,18 @@
             <input type="number" id="input-pubg-id" placeholder="Masalan: 5123456789" required>
           </div>
           <div class="form-group">
-            <label for="input-phone">TELEFON RAQAM (Ixtiyoriy)</label>
-            <input type="tel" id="input-phone" placeholder="+998 90 123 45 67">
+            <label for="input-phone">TELEFON RAQAM *</label>
+            <input type="tel" id="input-phone" placeholder="+998 90 123 45 67" required>
+          </div>
+          <div class="form-group">
+            <label for="input-receipt">TO'LOV CHEKI (SKRINSHOT) *</label>
+            <input type="file" id="input-receipt" accept="image/*" required>
+            <div id="receipt-preview-wrap" style="display: none; margin-top: 8px; text-align: center;">
+              <img id="receipt-preview-img" src="" alt="Chek ko'rinishi" style="max-height: 120px; border-radius: 8px; border: 1px solid #30363d;">
+            </div>
           </div>
           <button type="submit" class="submit-btn" id="book-submit-btn">
-            TASDIQLASH VA BAND QILISH
+            🚀 TO'LOV CHEKINI VA ARIZANI YUBORISH
           </button>
         </form>
       </div>

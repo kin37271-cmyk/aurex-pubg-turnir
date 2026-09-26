@@ -557,3 +557,93 @@ async def process_slot_price(message: Message, state: FSMContext):
         f"Ushbu narx Web App va botda darhol aks etadi.",
         reply_markup=get_main_menu(message.from_user.id)
     )
+
+
+# ==========================================
+# TO'LOV CHEKLARINI TASDIQLASH VA RAD ETISH
+# ==========================================
+
+@router.callback_query(F.data.startswith("pay_approve:"))
+async def callback_pay_approve(callback: CallbackQuery, bot: Bot):
+    """Admin to'lovni tasdiqlaganda"""
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat yo'q!", show_alert=True)
+        return
+
+    parts = callback.data.split(":")
+    slot_number = int(parts[1])
+    target_user_id = int(parts[2])
+
+    from database import approve_slot, get_slot
+    ok = await approve_slot(slot_number)
+    slot_info = await get_slot(slot_number)
+    pubg_nick = slot_info.get("pubg_nick", "Jangchi") if slot_info else "Jangchi"
+
+    admin_name = callback.from_user.first_name or "Admin"
+    caption_orig = callback.message.caption or ""
+    new_caption = f"{caption_orig}\n\n✅ <b>TO'LOV TASDIQLANDI!</b>\n👑 Qabul qildi: {admin_name}"
+
+    try:
+        await callback.message.edit_caption(caption=new_caption, reply_markup=None)
+    except Exception:
+        pass
+
+    # Foydalanuvchiga xushxabar yuborish
+    try:
+        await bot.send_message(
+            chat_id=target_user_id,
+            text=(
+                f"🎉 <b>TO'LOVINGIZ TASDIQLANDI!</b>\n\n"
+                f"Sizning <b>Slot #{slot_number:02d}</b> ({pubg_nick}) uchun 10 000 so'm to'lovingiz qabul qilindi "
+                f"va o'rningiz rasman tasdiqlandi! 🏆\n\n"
+                f"Turnir boshlanishidan 10 daqiqa oldin xona ID va paroli bot hamda Web App da e'lon qilinadi.\n"
+                f"Omad tilaymiz! 🎮"
+            )
+        )
+    except Exception as e:
+        print(f"Xabar yuborishda xato: {e}")
+
+    await callback.answer(f"✅ Slot #{slot_number} to'lovi tasdiqlandi!", show_alert=True)
+
+
+@router.callback_query(F.data.startswith("pay_reject:"))
+async def callback_pay_reject(callback: CallbackQuery, bot: Bot):
+    """Admin to'lovni rad etganda"""
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat yo'q!", show_alert=True)
+        return
+
+    parts = callback.data.split(":")
+    slot_number = int(parts[1])
+    target_user_id = int(parts[2])
+
+    from database import cancel_slot, get_slot
+    slot_info = await get_slot(slot_number)
+    pubg_nick = slot_info.get("pubg_nick", "Jangchi") if slot_info else "Jangchi"
+
+    await cancel_slot(slot_number)
+
+    admin_name = callback.from_user.first_name or "Admin"
+    caption_orig = callback.message.caption or ""
+    new_caption = f"{caption_orig}\n\n❌ <b>TO'LOV RAD ETILDI VA SLOT BO'SHATILDI!</b>\nRad etdi: {admin_name}"
+
+    try:
+        await callback.message.edit_caption(caption=new_caption, reply_markup=None)
+    except Exception:
+        pass
+
+    # Foydalanuvchiga rad etilgani haqida bildirishnoma
+    try:
+        await bot.send_message(
+            chat_id=target_user_id,
+            text=(
+                f"❌ <b>TO'LOVINGIZ RAD ETILDI!</b>\n\n"
+                f"Siz yuborgan to'lov cheki tasdiqlanmadi va <b>Slot #{slot_number:02d}</b> bo'shatildi.\n"
+                f"Agar biron xatolik bo'lgan bo'lsa, iltimos administratorga murojaat qiling."
+            )
+        )
+    except Exception as e:
+        print(f"Xabar yuborishda xato: {e}")
+
+    await callback.answer(f"❌ Slot #{slot_number} rad etildi va bo'shatildi!", show_alert=True)
+

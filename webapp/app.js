@@ -210,10 +210,15 @@ async function loadSlots() {
       const numStr = String(slot.slot_number).padStart(2, '0');
 
       if (isBooked) {
+        const isPending = slot.status === 'pending';
+        const statusHtml = isPending 
+          ? `<span class="slot-status-pill" style="background: rgba(255, 171, 0, 0.2); color: #ffab00; border: 1px solid rgba(255, 171, 0, 0.4);">🟡 KUTILMOQDA</span>`
+          : `<span class="slot-status-pill">🔴 BAND</span>`;
+
         card.innerHTML = `
           <div class="slot-card-header">
             <span class="slot-badge-num">SLOT #${numStr}</span>
-            <span class="slot-status-pill">🔴 BAND</span>
+            ${statusHtml}
           </div>
           <div class="slot-player-info">
             <div class="slot-player-nick">👤 ${escapeHtml(slot.pubg_nick || 'O\'yinchi')}</div>
@@ -318,8 +323,8 @@ function renderPlayersList(players) {
         </div>
       </div>
       <div class="player-right">
-        <span class="slot-status-pill" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.4);">
-          ✅ FAOL
+        <span class="slot-status-pill" style="${p.status === 'pending' ? 'background: rgba(255, 171, 0, 0.2); color: #ffab00; border: 1px solid rgba(255, 171, 0, 0.4);' : 'background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.4);'}">
+          ${p.status === 'pending' ? '🟡 KUTILMOQDA' : '✅ FAOL'}
         </span>
         ${p.phone ? `<span style="font-size: 10px; color: #8b949e;">📱 ${escapeHtml(p.phone)}</span>` : ''}
       </div>
@@ -384,15 +389,31 @@ async function loadProfile() {
     if (userSlot) {
       const numStr = String(userSlot.slot_number).padStart(2, '0');
       const hasRoom = tournamentData.room_id && tournamentData.room_password;
+      const isPending = userSlot.status === 'pending';
+
+      const statusPill = isPending 
+        ? `<span class="slot-status-pill" style="background: rgba(255, 171, 0, 0.2); color: #ffab00; border: 1px solid #ffab00;">🟡 KUTILMOQDA</span>`
+        : `<span class="slot-status-pill" style="background: rgba(0, 230, 118, 0.2); color: #00e676; border: 1px solid #00e676;">✅ TASDIQLANGAN</span>`;
+
+      const noticeBanner = isPending
+        ? `<div style="background: rgba(255, 171, 0, 0.12); border: 1px solid #ffab00; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; text-align: center;">
+            <div style="font-size: 13px; font-weight: 700; color: #ffab00;">⏳ To'lov chekingiz tekshirilmoqda</div>
+            <p style="font-size: 11px; color: #c9d1d9; margin-top: 4px;">
+              Siz yuborgan to'lov cheki administratorga (Murodaliyev Abdulaziz) yuborilgan. Tez orada tasdiqlanadi!
+            </p>
+          </div>`
+        : `<div style="background: rgba(0, 230, 118, 0.1); border: 1px solid #00e676; border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; text-align: center;">
+            <span style="font-size: 12px; font-weight: 700; color: #00e676;">✅ Turnirda faol ishtirokchi</span>
+          </div>`;
 
       container.innerHTML = `
         <div class="my-slot-card">
           <div class="my-slot-card-header">
             <span class="my-slot-title">🏆 SIZNING SLOTINGIZ: #${numStr}</span>
-            <span class="slot-status-pill" style="background: rgba(0, 230, 118, 0.2); color: #00e676; border: 1px solid #00e676;">
-              ✅ TASDIQLANGAN
-            </span>
+            ${statusPill}
           </div>
+
+          ${noticeBanner}
 
           <div class="details-grid">
             <div class="detail-item">
@@ -505,11 +526,34 @@ window.openBookModal = function(slotNumber) {
   document.getElementById('input-pubg-id').value = '';
   document.getElementById('input-phone').value = '';
 
+  const receiptInput = document.getElementById('input-receipt');
+  if (receiptInput) receiptInput.value = '';
+  const previewWrap = document.getElementById('receipt-preview-wrap');
+  if (previewWrap) previewWrap.style.display = 'none';
+
   modal.style.display = 'flex';
   if (tg?.HapticFeedback) {
     tg.HapticFeedback.impactOccurred('medium');
   }
 };
+
+// Image preview for receipt
+const receiptInputEl = document.getElementById('input-receipt');
+if (receiptInputEl) {
+  receiptInputEl.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const previewWrap = document.getElementById('receipt-preview-wrap');
+    const previewImg = document.getElementById('receipt-preview-img');
+    if (file && previewWrap && previewImg) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        previewImg.src = evt.target.result;
+        previewWrap.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
 
 document.getElementById('book-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -518,29 +562,42 @@ document.getElementById('book-form').addEventListener('submit', async (e) => {
   const nick = document.getElementById('input-pubg-nick').value.trim();
   const pubgId = document.getElementById('input-pubg-id').value.trim();
   const phone = document.getElementById('input-phone').value.trim();
+  const receiptInput = document.getElementById('input-receipt');
+  const receiptFile = receiptInput?.files?.[0];
 
   if (!nick || !pubgId) {
     alert("PUBG Nickname va PUBG ID to'ldirilishi shart!");
     return;
   }
 
+  if (!phone) {
+    alert("Iltimos, telefon raqamingizni kiriting!");
+    return;
+  }
+
+  if (!receiptFile) {
+    alert("Iltimos, to'lov cheki skrinshotini yuklang!");
+    return;
+  }
+
   const submitBtn = document.getElementById('book-submit-btn');
   submitBtn.disabled = true;
-  submitBtn.innerText = "BAND QILINMOQDA...";
+  submitBtn.innerText = "CHEK VA ARIZA YUBORILMOQDA...";
 
   try {
-    const res = await fetch('/api/book', {
+    const formData = new FormData();
+    formData.append('slot_number', slotNum);
+    formData.append('user_id', currentUser.id || (1000 + Math.floor(Math.random() * 900000)));
+    formData.append('user_name', currentUser.name);
+    formData.append('user_username', currentUser.raw_username || '');
+    formData.append('pubg_nick', nick);
+    formData.append('pubg_id', pubgId);
+    formData.append('phone', phone);
+    formData.append('receipt', receiptFile);
+
+    const res = await fetch('/api/book_with_receipt', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        slot_number: slotNum,
-        user_id: currentUser.id || (1000 + Math.floor(Math.random() * 900000)),
-        user_name: currentUser.name,
-        user_username: currentUser.raw_username,
-        pubg_nick: nick,
-        pubg_id: pubgId,
-        phone: phone || null
-      })
+      body: formData
     });
 
     const data = await res.json();
@@ -548,7 +605,7 @@ document.getElementById('book-form').addEventListener('submit', async (e) => {
       if (tg?.HapticFeedback) {
         tg.HapticFeedback.notificationOccurred('success');
       }
-      alert(`🎉 Tabriklaymiz! Slot #${slotNum} muvaffaqiyatli band qilindi!`);
+      alert(`🎉 To'lov chekingiz adminga tekshirish uchun yuborildi!\n\nSlot #${slotNum} tez orada tasdiqlanadi.`);
       modal.style.display = 'none';
       await loadSlots();
       await loadPlayers();
@@ -565,7 +622,7 @@ document.getElementById('book-form').addEventListener('submit', async (e) => {
     alert("Server bilan aloqada xatolik yuz berdi.");
   } finally {
     submitBtn.disabled = false;
-    submitBtn.innerText = "TASDIQLASH VA BAND QILISH";
+    submitBtn.innerText = "🚀 TO'LOV CHEKINI VA ARIZANI YUBORISH";
   }
 });
 

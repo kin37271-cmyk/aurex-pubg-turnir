@@ -12,6 +12,13 @@ ADMIN_IDS: List[int] = [
     int(x.strip()) for x in admin_ids_raw.split(",") if x.strip().isdigit()
 ]
 
+# To'lov cheklari boradigan asosiy Admin (8825408278)
+PAYMENT_ADMIN_ID = int(os.getenv("PAYMENT_ADMIN_ID", "8825408278"))
+
+# To'lov kartasi ma'lumotlari
+CARD_HOLDER = os.getenv("CARD_HOLDER", "Murodaliyev Abdulaziz")
+CARD_NUMBER = os.getenv("CARD_NUMBER", "4198130083012731")
+
 # Rasmiy kanal username yoki ID si (masalan: @aurex_pubg yoki -1001234567890)
 CHANNEL_ID = os.getenv("CHANNEL_ID", "")
 

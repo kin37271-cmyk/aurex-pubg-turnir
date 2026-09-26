@@ -402,6 +402,71 @@ async def callback_refresh_my_slot(callback: CallbackQuery):
         await callback.answer("O'zgarish yo'q")
 
 
+@router.message(F.photo)
+async def handle_user_photo(message: Message, bot: Bot):
+    """Foydalanuvchi botga to'lov cheki (rasm) yuborganda"""
+    from config import CARD_HOLDER, CARD_NUMBER, PAYMENT_ADMIN_ID
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+    user_id = message.from_user.id
+    user_slot = await get_user_slot(user_id)
+
+    if not user_slot:
+        await message.answer(
+            "⚠️ <b>Sizda hali band qilingan slot yo'q!</b>\n\n"
+            "To'lov qilishdan oldin, iltimos, <b>Aurex Web App</b> ga kirib o'zingizga slot tanlang:",
+            reply_markup=get_webapp_inline_keyboard(get_webapp_url())
+        )
+        return
+
+    slot_number = user_slot["slot_number"]
+    pubg_nick = user_slot.get("pubg_nick", "---")
+    pubg_id = user_slot.get("pubg_id", "---")
+    phone = user_slot.get("phone", "---")
+    user_name = message.from_user.full_name or "Ishtirokchi"
+    username = message.from_user.username
+
+    photo_file_id = message.photo[-1].file_id
+
+    caption = (
+        f"🧾 <b>YANGI TO'LOV CHEKI! (Bot orqali keldi)</b>\n\n"
+        f"📍 <b>Slot:</b> Slot #{slot_number:02d}\n"
+        f"👤 <b>PUBG Nick:</b> <code>{pubg_nick}</code>\n"
+        f"🆔 <b>PUBG ID:</b> <code>{pubg_id}</code>\n"
+        f"📱 <b>Telefon:</b> <code>{phone}</code>\n"
+        f"👤 <b>Foydalanuvchi:</b> {user_name} (@{username or 'yo_q'})\n"
+        f"🆔 <b>Telegram ID:</b> <code>{user_id}</code>\n"
+        f"💰 <b>To'lov:</b> 10 000 so'm (100%)\n"
+        f"💳 <b>Karta:</b> <code>{CARD_NUMBER}</code> ({CARD_HOLDER})\n\n"
+        f"❓ <b>To'lovni tasdiqlaysizmi?</b>"
+    )
+
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Tasdiqlash", callback_data=f"pay_approve:{slot_number}:{user_id}"),
+            InlineKeyboardButton(text="❌ Yo'q (Rad etish)", callback_data=f"pay_reject:{slot_number}:{user_id}")
+        ]
+    ])
+
+    try:
+        await bot.send_photo(
+            chat_id=PAYMENT_ADMIN_ID,
+            photo=photo_file_id,
+            caption=caption,
+            reply_markup=markup
+        )
+        await message.answer(
+            f"✅ <b>To'lov chekingiz adminga ({CARD_HOLDER}) yuborildi!</b>\n\n"
+            f"📍 <b>Slot #{slot_number:02d}</b> tez orada tekshirilib tasdiqlanadi.\n"
+            f"Holatni <b>Aurex Web App</b> profilingizda kuzatishingiz mumkin!",
+            reply_markup=get_webapp_inline_keyboard(get_webapp_url())
+        )
+    except Exception as e:
+        await message.answer(
+            "⚠️ Chekni adminga yuborishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring yoki adminga yozing."
+        )
+
+
 @router.message(F.text)
 async def fallback_to_webapp(message: Message):
     """Barcha matnli xabarlarni to'g'ridan-to'g'ri Web App ga yo'naltirish"""
@@ -416,4 +481,5 @@ async def fallback_to_webapp(message: Message):
         "👇 Web App ga kirish uchun pastdagi <b>«AUREX TURNIR»</b> tugmasini bosing:",
         reply_markup=inline_kb or reply_kb
     )
+
 

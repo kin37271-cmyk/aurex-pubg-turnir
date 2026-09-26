@@ -1,6 +1,8 @@
 import os
+import time
+import logging
 from aiohttp import web
-from config import ADMIN_IDS
+from config import ADMIN_IDS, PAYMENT_ADMIN_ID, CARD_HOLDER, CARD_NUMBER
 from database import (
     get_tournament,
     get_all_slots,
@@ -9,6 +11,8 @@ from database import (
     get_all_matches,
     get_registered_players,
     book_slot,
+    book_slot_pending,
+    approve_slot,
     cancel_slot,
     set_room_details,
     update_tournament_stage,
@@ -16,7 +20,10 @@ from database import (
     reset_tournament
 )
 
+logger = logging.getLogger("AurexServer")
 WEBAPP_DIR = os.path.dirname(os.path.abspath(__file__))
+RECEIPTS_DIR = os.path.join(os.path.dirname(WEBAPP_DIR), "assets", "receipts")
+os.makedirs(RECEIPTS_DIR, exist_ok=True)
 
 async def handle_index(request):
     """Bosh sahifani uzatish"""
@@ -31,8 +38,11 @@ async def handle_static_app(request):
     return web.FileResponse(os.path.join(WEBAPP_DIR, "app.js"))
 
 async def api_get_tournament(request):
-    """Turnir ma'lumotlarini qaytarish"""
+    """Turnir va to'lov karta ma'lumotlarini qaytarish"""
     data = await get_tournament()
+    data["card_holder"] = CARD_HOLDER
+    data["card_number"] = CARD_NUMBER
+    data["payment_admin_id"] = PAYMENT_ADMIN_ID
     return web.json_response(data)
 
 async def api_get_slots(request):
@@ -76,8 +86,114 @@ async def api_check_admin(request):
     except Exception:
         return web.json_response({"is_admin": False})
 
+async def api_book_with_receipt(request):
+    """Chek bilan birga slotni band qilish API"""
+    try:
+        data = await request.post()
+        slot_number = int(data.get("slot_number", 0))
+        user_id = int(data.get("user_id", 0))
+        user_name = str(data.get("user_name", "Ishtirokchi"))
+        user_username = data.get("user_username")
+        pubg_nick = str(data.get("pubg_nick", "")).strip()
+        pubg_id = str(data.get("pubg_id", "")).strip()
+        phone = str(data.get("phone", "")).strip()
+
+        if not (1 <= slot_number <= 16):
+            return web.json_response({"success": False, "error": "Slot raqami 1 dan 16 gacha bo'lishi kerak"}, status=400)
+
+        if not pubg_nick or not pubg_id:
+            return web.json_response({"success": False, "error": "PUBG Nickname va PUBG ID to'ldirilishi shart"}, status=400)
+
+        if not phone:
+            return web.json_response({"success": False, "error": "Telefon raqamingizni kiriting"}, status=400)
+
+        # Chek faylini olish va saqlash
+        receipt_file = data.get("receipt")
+        saved_filename = None
+        saved_filepath = None
+
+        if receipt_file and hasattr(receipt_file, "file"):
+            content = receipt_file.file.read()
+            if content:
+                ext = ".jpg"
+                orig_name = getattr(receipt_file, "filename", "")
+                if orig_name and "." in orig_name:
+                    ext = "." + orig_name.rsplit(".", 1)[1].lower()
+                saved_filename = f"receipt_slot{slot_number}_{user_id}_{int(time.time())}{ext}"
+                saved_filepath = os.path.join(RECEIPTS_DIR, saved_filename)
+                with open(saved_filepath, "wb") as f:
+                    f.write(content)
+
+        if not saved_filepath or not os.path.exists(saved_filepath):
+            return web.json_response({"success": False, "error": "Iltimos, to'lov cheki skrinshotini yuklang!"}, status=400)
+
+        # Slot holatini tekshirish
+        slot = await get_slot(slot_number)
+        if not slot:
+            return web.json_response({"success": False, "error": "Slot topilmadi"}, status=404)
+        if slot.get("user_id") and slot.get("user_id") != user_id:
+            return web.json_response({"success": False, "error": f"Slot #{slot_number} allaqachon band qilingan"}, status=400)
+
+        # Pending statusida band qilish
+        success = await book_slot_pending(
+            slot_number=slot_number,
+            user_id=user_id,
+            user_name=user_name,
+            user_username=user_username,
+            pubg_nick=pubg_nick,
+            pubg_id=pubg_id,
+            phone=phone,
+            receipt_path=saved_filepath
+        )
+
+        if not success:
+            return web.json_response({"success": False, "error": "Bu slot band yoki siz allaqachon boshqa slot olgansiz"}, status=400)
+
+        # Admin 8825408278 ga Telegram orqali chekni yuborish
+        bot = request.app.get("bot")
+        if bot:
+            from aiogram.types import FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
+            caption = (
+                f"🧾 <b>YANGI TO'LOV CHEKI TUSHDI!</b>\n\n"
+                f"📍 <b>Slot:</b> Slot #{slot_number:02d}\n"
+                f"👤 <b>PUBG Nick:</b> <code>{pubg_nick}</code>\n"
+                f"🆔 <b>PUBG ID:</b> <code>{pubg_id}</code>\n"
+                f"📱 <b>Telefon:</b> <code>{phone}</code>\n"
+                f"👤 <b>Foydalanuvchi:</b> {user_name} (@{user_username or 'yo_q'})\n"
+                f"🆔 <b>Telegram ID:</b> <code>{user_id}</code>\n"
+                f"💰 <b>To'lov:</b> 10 000 so'm (100%)\n"
+                f"💳 <b>Karta:</b> <code>{CARD_NUMBER}</code> ({CARD_HOLDER})\n\n"
+                f"❓ <b>To'lovni tasdiqlaysizmi?</b>"
+            )
+            markup = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="✅ Tasdiqlash", callback_data=f"pay_approve:{slot_number}:{user_id}"),
+                    InlineKeyboardButton(text="❌ Yo'q (Rad etish)", callback_data=f"pay_reject:{slot_number}:{user_id}")
+                ]
+            ])
+            try:
+                await bot.send_photo(
+                    chat_id=PAYMENT_ADMIN_ID,
+                    photo=FSInputFile(saved_filepath),
+                    caption=caption,
+                    reply_markup=markup
+                )
+                logger.info(f"✅ Chek adminga ({PAYMENT_ADMIN_ID}) yuborildi: Slot #{slot_number}")
+            except Exception as bot_err:
+                logger.error(f"Adminga chek yuborishda xato: {bot_err}")
+
+        return web.json_response({
+            "success": True,
+            "slot_number": slot_number,
+            "message": "To'lov cheki adminga tekshirish uchun yuborildi! Tez orada tasdiqlanadi."
+        })
+
+    except Exception as e:
+        logger.error(f"api_book_with_receipt xatosi: {e}")
+        return web.json_response({"success": False, "error": str(e)}, status=500)
+
 async def api_book_slot(request):
-    """Slotni band qilish API"""
+    """Oddiy band qilish (bepul bo'lganda)"""
     try:
         body = await request.json()
         slot_number = int(body.get("slot_number", 0))
@@ -94,7 +210,6 @@ async def api_book_slot(request):
         if not pubg_nick or not pubg_id:
             return web.json_response({"success": False, "error": "PUBG Nickname va PUBG ID to'ldirilishi shart"}, status=400)
 
-        # Slot holatini tekshirish
         slot = await get_slot(slot_number)
         if not slot:
             return web.json_response({"success": False, "error": "Slot topilmadi"}, status=404)
@@ -129,7 +244,6 @@ async def api_cancel_slot(request):
         if not (1 <= slot_number <= 16):
             return web.json_response({"success": False, "error": "Noto'g'ri slot raqami"}, status=400)
 
-        # Agar admin bo'lsa to'g'ridan to'g'ri bo'shata oladi
         if user_id in ADMIN_IDS:
             ok = await cancel_slot(slot_number)
         else:
@@ -142,7 +256,7 @@ async def api_cancel_slot(request):
     except Exception as e:
         return web.json_response({"success": False, "error": str(e)}, status=500)
 
-# --- ADMIN API ENDPOINTS ---
+# --- ADMIN APIS ---
 
 async def api_admin_room(request):
     """Admin: Xona ID va parolini o'rnatish"""
@@ -220,9 +334,11 @@ async def api_admin_reset(request):
         return web.json_response({"success": False, "error": str(e)}, status=500)
 
 
-def create_webapp():
+def create_webapp(bot=None):
     """aiohttp web dasturini yaratish"""
     app = web.Application()
+    app["bot"] = bot
+
     app.router.add_get("/", handle_index)
     app.router.add_get("/index.html", handle_index)
     app.router.add_get("/static/style.css", handle_static_style)
@@ -237,6 +353,7 @@ def create_webapp():
     app.router.add_get("/api/check_admin", api_check_admin)
 
     app.router.add_post("/api/book", api_book_slot)
+    app.router.add_post("/api/book_with_receipt", api_book_with_receipt)
     app.router.add_post("/api/cancel_slot", api_cancel_slot)
 
     # Admin APIs
@@ -248,9 +365,9 @@ def create_webapp():
 
     return app
 
-async def start_webapp_server(host: str = "0.0.0.0", port: int = 8080):
+async def start_webapp_server(bot=None, host: str = "0.0.0.0", port: int = 8080):
     """Web serverni asyncio ichida fonda ishga tushirish"""
-    app = create_webapp()
+    app = create_webapp(bot=bot)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, host, port)
