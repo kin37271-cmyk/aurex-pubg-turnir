@@ -23,11 +23,11 @@ CARD_NUMBER = os.getenv("CARD_NUMBER", "4198130083012731")
 CHANNEL_ID = os.getenv("CHANNEL_ID", "")
 
 # Telegram Web App manzili (HTTPS bo'lishi shart)
-WEBAPP_URL = os.getenv("WEBAPP_URL", "")
+WEBAPP_URL = os.getenv("WEBAPP_URL") or os.getenv("RENDER_EXTERNAL_URL", "")
 
 def get_webapp_url() -> str:
     """Hozirgi aktiv Web App manzilini qaytarish"""
-    return os.getenv("WEBAPP_URL", WEBAPP_URL)
+    return os.getenv("WEBAPP_URL") or os.getenv("RENDER_EXTERNAL_URL") or WEBAPP_URL
 
 def set_webapp_url(new_url: str):
     """Web App manzilini yangilash va .env fayliga saqlash"""
