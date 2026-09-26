@@ -48,40 +48,131 @@
     </header>
 
     <!-- NAVIGATION TABS -->
-    <nav class="nav-tabs">
+    <nav class="nav-tabs" id="nav-tabs-bar">
       <button class="nav-tab active" data-tab="slots-tab">
         <span class="tab-icon">🎮</span>
         <span class="tab-text">Slotlar</span>
+      </button>
+      <button class="nav-tab" data-tab="players-tab">
+        <span class="tab-icon">👥</span>
+        <span class="tab-text">Mijozlar</span>
+      </button>
+      <button class="nav-tab" data-tab="profile-tab">
+        <span class="tab-icon">👤</span>
+        <span class="tab-text">Profil</span>
       </button>
       <button class="nav-tab" data-tab="schedule-tab">
         <span class="tab-icon">🗓</span>
         <span class="tab-text">Jadval</span>
       </button>
-      <button class="nav-tab" data-tab="room-tab">
-        <span class="tab-icon">🚪</span>
-        <span class="tab-text">Xona</span>
-      </button>
       <button class="nav-tab" data-tab="rules-tab">
         <span class="tab-icon">ℹ️</span>
         <span class="tab-text">Qoidalar</span>
       </button>
+      <button class="nav-tab admin-tab-btn" data-tab="admin-tab" id="admin-nav-tab" style="display: none;">
+        <span class="tab-icon">🛡️</span>
+        <span class="tab-text">Admin</span>
+      </button>
     </nav>
 
-    <!-- TAB 1: 16 TA SLOT GRID -->
+    <!-- ==================== TAB 1: 16 TA SLOT GRID ==================== -->
     <section id="slots-tab" class="tab-content active">
       <div class="section-header">
         <h2>16 TA SLOT PANJARASI</h2>
-        <span class="section-sub">Bo'sh slotni tanlab, turnirga yoziling</span>
+        <span class="section-sub">O'zingizga ma'qul bo'sh slotni tanlab, turnirga yoziling</span>
       </div>
       <div class="slots-grid" id="slots-grid-container">
-        <!-- 16 ta slot javascript orqali yuklanadi -->
         <div class="loading-spinner">Slotlar yuklanmoqda...</div>
       </div>
     </section>
 
-    <!-- TAB 2: JADVAL (Har 2 kunda 2 ta o'yin) -->
-    <section id="schedule-tab" class="tab-content">
+    <!-- ==================== TAB 2: MIJOZLAR (ISHTIROKCHILAR RO'YXATI) ==================== -->
+    <section id="players-tab" class="tab-content">
+      <div class="section-header flex-header">
+        <div>
+          <h2>ISHTIROKCHILAR (MIJOZLAR)</h2>
+          <span class="section-sub">Turnirda band qilingan barcha o'yinchilar</span>
+        </div>
+        <div class="players-count-badge" id="players-summary-badge">0 / 16</div>
+      </div>
+
+      <!-- Search box -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="player-search-input" placeholder="PUBG Nick yoki ID bo'yicha qidirish...">
+      </div>
+
+      <!-- Players container -->
+      <div class="players-list" id="players-list-container">
+        <div class="loading-spinner">Ishtirokchilar yuklanmoqda...</div>
+      </div>
+
+      <div class="remaining-slots-card" id="remaining-slots-card">
+        <div class="remaining-icon">⚡</div>
+        <div class="remaining-text">
+          <h4 id="remaining-count-text">Yana 16 ta bo'sh o'rin mavjud!</h4>
+          <p>Turnirda qatnashish uchun o'z slotingizni hoziroq band qiling.</p>
+        </div>
+        <button class="action-btn-sm" onclick="switchTab('slots-tab')">Slot Tanlash</button>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: PROFIL ==================== -->
+    <section id="profile-tab" class="tab-content">
       <div class="section-header">
+        <h2>MENING PROFILIM</h2>
+        <span class="section-sub">Telegram profilingiz va turnirdagi ishtirokingiz</span>
+      </div>
+
+      <!-- User telegram card -->
+      <div class="user-profile-card">
+        <div class="user-avatar-wrap">
+          <div class="user-avatar" id="user-avatar-letter">J</div>
+        </div>
+        <div class="user-profile-details">
+          <h3 id="user-profile-name">Jangchi</h3>
+          <p class="user-username" id="user-profile-username">@username</p>
+          <span class="user-id-badge" id="user-profile-id">ID: -------</span>
+        </div>
+        <div class="user-role-badge" id="user-role-badge">O'YINCHI</div>
+      </div>
+
+      <!-- Slot status card -->
+      <div class="my-slot-section">
+        <h3 class="subsection-title">🎯 SIZNING TURNIR SLOTINGIZ</h3>
+        <div id="my-slot-content">
+          <div class="loading-spinner">Ma'lumotlar yuklanmoqda...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: JADVAL & XONA ==================== -->
+    <section id="schedule-tab" class="tab-content">
+      <!-- ROOM CARD -->
+      <div class="room-card" id="room-info-card">
+        <div class="room-icon">🚪</div>
+        <h3 id="room-status-title">Xona hali ochilmagan</h3>
+        <p id="room-status-desc">Turnir boshlanishidan 10 daqiqa oldin Room ID va Parol beriladi.</p>
+        
+        <div class="room-credentials" id="room-creds" style="display: none;">
+          <div class="cred-box">
+            <span class="cred-label">ROOM ID</span>
+            <span class="cred-val" id="room-id-val">------</span>
+            <button class="copy-btn" onclick="copyText('room-id-val', this)">Nusxa olish 📋</button>
+          </div>
+          <div class="cred-box">
+            <span class="cred-label">PAROL</span>
+            <span class="cred-val" id="room-pass-val">----</span>
+            <button class="copy-btn" onclick="copyText('room-pass-val', this)">Nusxa olish 📋</button>
+          </div>
+        </div>
+
+        <div class="room-note">
+          ⚠️ <b>Diqqat:</b> PUBG Mobile ilovasida faqat o'zingiz band qilgan slot raqamiga o'tiring!
+        </div>
+      </div>
+
+      <div class="section-header" style="margin-top: 20px;">
         <h2>O'YINLAR JADVALI</h2>
         <span class="section-sub">Tartib: Har 2 kunda 2 ta o'yin Custom Room'da</span>
       </div>
@@ -117,33 +208,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: XONA MA'LUMOTLARI -->
-    <section id="room-tab" class="tab-content">
-      <div class="section-header">
-        <h2>PUBG MOBILE CUSTOM ROOM</h2>
-        <span class="section-sub">O'yin kuni xona ID va paroli shu yerda chiqadi</span>
-      </div>
-      <div class="room-card" id="room-info-card">
-        <div class="room-icon">🚪</div>
-        <h3 id="room-status-title">Xona hali ochilmagan</h3>
-        <p id="room-status-desc">Turnir boshlanishidan 10 daqiqa oldin Room ID va Parol beriladi.</p>
-        <div class="room-credentials" id="room-creds" style="display: none;">
-          <div class="cred-box">
-            <span class="cred-label">ROOM ID</span>
-            <span class="cred-val" id="room-id-val">------</span>
-          </div>
-          <div class="cred-box">
-            <span class="cred-label">PAROL</span>
-            <span class="cred-val" id="room-pass-val">----</span>
-          </div>
-        </div>
-        <div class="room-note">
-          ⚠️ <b>Diqqat:</b> PUBG Mobile ilovasida faqat o'zingiz band qilgan slot raqamiga o'tiring!
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: QOIDALAR -->
+    <!-- ==================== TAB 5: QOIDALAR ==================== -->
     <section id="rules-tab" class="tab-content">
       <div class="section-header">
         <h2>TURNIR QOIDALARI</h2>
@@ -168,12 +233,69 @@
         </div>
         <div class="rule-row">
           <span class="rule-num">5</span>
-          <p><b>Halol o'yin:</b> Chiterlik, emulyator (PC) va teaming qat'iyan man etiladi.</p>
+          <p><b>Halol o'yin:</b> Chiterlik, emulyator (PC), iPad view va teaming qat'iyan man etiladi.</p>
         </div>
       </div>
     </section>
 
-    <!-- MODAL: SLOTNI BAND QILISH -->
+    <!-- ==================== TAB 6: ADMIN PANEL (FAYAT ADMINLAR UCHUN) ==================== -->
+    <section id="admin-tab" class="tab-content">
+      <div class="section-header">
+        <h2>🛡️ ADMIN BOSHQARUV PANELI</h2>
+        <span class="section-sub">Turnirni to'liq boshqarish</span>
+      </div>
+
+      <!-- Admin Room Form -->
+      <div class="admin-card">
+        <h3>🚪 Xona (Room ID & Parol) Berish</h3>
+        <p class="admin-card-desc">Kiritilgan ma'lumotlar barcha 16 ishtirokchiga real-vaqtda ko'rinadi</p>
+        <div class="form-row">
+          <input type="text" id="admin-room-id" placeholder="Room ID (masalan: 1234567)">
+          <input type="text" id="admin-room-pass" placeholder="Parol (masalan: 1234)">
+        </div>
+        <button class="admin-btn primary" onclick="adminSaveRoom()">📢 Xonani E'lon Qilish</button>
+      </div>
+
+      <!-- Admin Stage Form -->
+      <div class="admin-card">
+        <h3>⚔️ Turnir Bosqichi</h3>
+        <p class="admin-card-desc">Turnir holatini o'zgartirish</p>
+        <div class="admin-stage-grid">
+          <button class="admin-stage-btn" onclick="adminSetStage('registration', 'Ro\'yxatga olish')">📝 Ro'yxatga olish</button>
+          <button class="admin-stage-btn" onclick="adminSetStage('chorak_final', 'Chorak Final')">⚔️ Chorak Final</button>
+          <button class="admin-stage-btn" onclick="adminSetStage('yarim_final', 'Yarim Final')">🔥 Yarim Final</button>
+          <button class="admin-stage-btn gold" onclick="adminTriggerFinalModal()">🏆 Grand Final & Salyut 🎆</button>
+        </div>
+      </div>
+
+      <!-- Admin Price Form -->
+      <div class="admin-card">
+        <h3>💵 Slot Narxini O'zgartirish</h3>
+        <p class="admin-card-desc">0 kiritsangiz bepul bo'ladi, summa kiritsangiz slot to'lovi chiqadi</p>
+        <div class="form-row">
+          <input type="number" id="admin-slot-price" placeholder="Narx (so'm)">
+          <button class="admin-btn secondary" onclick="adminSavePrice()">Narxni Saqlash</button>
+        </div>
+      </div>
+
+      <!-- Admin Kick Player (Slot Management) -->
+      <div class="admin-card">
+        <h3>👥 O'yinchilarni Boshqarish (Kick / Chetlatish)</h3>
+        <p class="admin-card-desc">Qoidabuzarlik qilgan o'yinchining slotini bo'shatish</p>
+        <div class="admin-slots-list" id="admin-slots-manage-list">
+          <!-- Loaded via JS -->
+        </div>
+      </div>
+
+      <!-- Admin Reset Tournament -->
+      <div class="admin-card danger-card">
+        <h3>🔄 Turnirni Tozalash (Reset)</h3>
+        <p class="admin-card-desc">Barcha 16 ta slotni bo'shatadi va yangi turnirni boshlaydi.</p>
+        <button class="admin-btn danger" onclick="adminResetTournament()">⚠️ Butun Turnirni Tozalash</button>
+      </div>
+    </section>
+
+    <!-- ==================== MODAL: SLOTNI BAND QILISH ==================== -->
     <div class="modal-overlay" id="book-modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -205,7 +327,7 @@
       </div>
     </div>
 
-    <!-- GRAND FINAL SALYUT BANNER (G'olib aniqlanganda) -->
+    <!-- ==================== GRAND FINAL SALYUT BANNER ==================== -->
     <div class="fireworks-banner" id="fireworks-banner" style="display: none;">
       <div class="banner-box">
         <div class="trophy-icon">🏆</div>
@@ -217,6 +339,8 @@
     </div>
 
   </div>
+
+  <div id="toast-notification" class="toast">Nusxa olindi!</div>
 
   <script src="/static/app.js"></script>
 </body>

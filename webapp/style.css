@@ -30,7 +30,7 @@ body {
 .app-container {
   max-width: 480px;
   margin: 0 auto;
-  padding: 16px 14px 40px;
+  padding: 14px 12px 60px;
   position: relative;
   z-index: 10;
 }
@@ -38,7 +38,7 @@ body {
 /* HEADER */
 .header {
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .header-badge {
@@ -49,11 +49,11 @@ body {
   border: 1px solid rgba(255, 102, 0, 0.4);
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #ff9900;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   letter-spacing: 0.5px;
 }
 
@@ -74,7 +74,7 @@ body {
 
 .logo-title {
   font-family: 'Teko', sans-serif;
-  font-size: 40px;
+  font-size: 38px;
   line-height: 1;
   letter-spacing: 1.5px;
   color: #ffffff;
@@ -88,7 +88,7 @@ body {
 .tournament-name {
   font-size: 13px;
   color: #8b949e;
-  margin-top: 3px;
+  margin-top: 2px;
   font-weight: 500;
 }
 
@@ -101,8 +101,8 @@ body {
   border: 1px solid rgba(255, 136, 0, 0.25);
   backdrop-filter: blur(10px);
   border-radius: 14px;
-  padding: 12px 6px;
-  margin-top: 14px;
+  padding: 10px 4px;
+  margin-top: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
@@ -114,7 +114,7 @@ body {
 }
 
 .stat-label {
-  font-size: 10px;
+  font-size: 9px;
   color: #8b949e;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -123,7 +123,7 @@ body {
 
 .stat-value {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: #ffffff;
 }
@@ -139,7 +139,7 @@ body {
 
 .stat-divider {
   width: 1px;
-  height: 28px;
+  height: 24px;
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -162,16 +162,25 @@ body {
   box-shadow: 0 0 10px rgba(255, 136, 0, 0.6);
 }
 
-/* NAVIGATION TABS */
+/* NAVIGATION TABS (Scrollable / Auto grid for 5-6 items) */
 .nav-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  display: flex;
+  gap: 6px;
   margin-bottom: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-tab {
-  background: rgba(22, 27, 34, 0.7);
+  flex: 1;
+  min-width: 62px;
+  background: rgba(22, 27, 34, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 8px 4px;
@@ -184,28 +193,35 @@ body {
 }
 
 .nav-tab .tab-icon {
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .nav-tab .tab-text {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .nav-tab.active {
-  background: rgba(255, 102, 0, 0.18);
+  background: rgba(255, 102, 0, 0.2);
   border-color: #ff8800;
+  box-shadow: 0 0 12px rgba(255, 136, 0, 0.25);
 }
 
 .nav-tab.active .tab-text {
   color: #ffffff;
 }
 
+.nav-tab.admin-tab-btn {
+  border-color: rgba(255, 85, 0, 0.3);
+}
+
 /* TAB CONTENTS */
 .tab-content {
   display: none;
-  animation: fadeIn 0.25s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 .tab-content.active {
@@ -232,6 +248,23 @@ body {
 .section-sub {
   font-size: 12px;
   color: #8b949e;
+}
+
+.flex-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.players-count-badge {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 10px;
+  background: rgba(0, 230, 118, 0.15);
+  border: 1px solid rgba(0, 230, 118, 0.4);
+  color: #00e676;
+  border-radius: 20px;
 }
 
 /* 16 SLOTS GRID */
@@ -263,8 +296,8 @@ body {
 }
 
 .slot-card.booked {
-  border-color: rgba(255, 68, 68, 0.3);
-  background: rgba(25, 18, 20, 0.8);
+  border-color: rgba(255, 68, 68, 0.35);
+  background: rgba(25, 18, 20, 0.85);
 }
 
 .slot-card-header {
@@ -324,7 +357,7 @@ body {
 .slot-book-btn {
   width: 100%;
   margin-top: 8px;
-  padding: 6px 0;
+  padding: 7px 0;
   background: #ff6600;
   color: #ffffff;
   border: none;
@@ -337,6 +370,316 @@ body {
 
 .slot-book-btn:active {
   background: #e65c00;
+}
+
+/* SEARCH BOX */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.search-box input {
+  background: none;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 13px;
+  width: 100%;
+}
+
+.search-icon {
+  font-size: 14px;
+  color: #8b949e;
+}
+
+/* PLAYERS (MIJOZLAR) LIST */
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-card {
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.player-card:hover {
+  border-color: rgba(255, 136, 0, 0.3);
+}
+
+.player-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-slot-badge {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(255, 102, 0, 0.15);
+  border: 1px solid rgba(255, 102, 0, 0.35);
+  color: #ff9900;
+  padding: 6px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.player-meta h4 {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.player-meta p {
+  font-size: 12px;
+  color: #8b949e;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.player-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.remaining-slots-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255, 102, 0, 0.1);
+  border: 1px dashed rgba(255, 136, 0, 0.4);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 14px;
+}
+
+.remaining-icon {
+  font-size: 24px;
+}
+
+.remaining-text h4 {
+  font-size: 13px;
+  color: #ff9900;
+  font-weight: 700;
+}
+
+.remaining-text p {
+  font-size: 11px;
+  color: #8b949e;
+  margin-top: 2px;
+}
+
+.action-btn-sm {
+  background: #ff6600;
+  border: none;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* USER PROFILE */
+.user-profile-card {
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid rgba(255, 136, 0, 0.3);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.user-avatar-wrap {
+  position: relative;
+}
+
+.user-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6600, #ffaa00);
+  color: #ffffff;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 14px rgba(255, 102, 0, 0.4);
+}
+
+.user-profile-details h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.user-username {
+  font-size: 12px;
+  color: #8b949e;
+  margin-top: 1px;
+}
+
+.user-id-badge {
+  font-size: 10px;
+  background: #0d1117;
+  color: #8b949e;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: inline-block;
+  font-family: monospace;
+}
+
+.user-role-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.subsection-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  color: #ff9900;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+/* MY SLOT CARD */
+.my-slot-card {
+  background: linear-gradient(145deg, rgba(22, 27, 34, 0.95), rgba(30, 20, 10, 0.95));
+  border: 1px solid #ff8800;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.15);
+}
+
+.my-slot-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.my-slot-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffaa00;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.detail-item {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.detail-item.full-width {
+  grid-column: span 2;
+}
+
+.detail-label {
+  font-size: 10px;
+  color: #8b949e;
+  font-weight: 700;
+  display: block;
+}
+
+.detail-val {
+  font-size: 13px;
+  color: #ffffff;
+  font-weight: 600;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cancel-slot-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 68, 68, 0.15);
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  color: #ff5252;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.cancel-slot-btn:active {
+  background: rgba(255, 68, 68, 0.3);
+}
+
+.empty-slot-card {
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.empty-slot-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.empty-slot-card h4 {
+  font-size: 15px;
+  color: #ffffff;
+}
+
+.empty-slot-card p {
+  font-size: 12px;
+  color: #8b949e;
+  margin: 6px 0 16px;
 }
 
 /* JADVAL / SCHEDULE */
@@ -391,59 +734,77 @@ body {
   background: rgba(22, 27, 34, 0.85);
   border: 1px solid rgba(255, 102, 0, 0.3);
   border-radius: 14px;
-  padding: 24px 16px;
+  padding: 20px 16px;
   text-align: center;
 }
 
 .room-icon {
-  font-size: 40px;
-  margin-bottom: 8px;
+  font-size: 36px;
+  margin-bottom: 6px;
 }
 
 .room-card h3 {
-  font-size: 18px;
+  font-size: 17px;
   color: #ffffff;
 }
 
 .room-card p {
-  font-size: 13px;
+  font-size: 12px;
   color: #8b949e;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 .room-credentials {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .cred-box {
   background: #0d1117;
   border: 1px solid #30363d;
   border-radius: 10px;
-  padding: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .cred-label {
-  font-size: 10px;
+  font-size: 9px;
   color: #8b949e;
   font-weight: 700;
-  display: block;
 }
 
 .cred-val {
   font-family: monospace;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: #00e676;
-  margin-top: 4px;
-  display: block;
+  margin: 3px 0 6px;
+}
+
+.copy-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f0f3f6;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: #ff6600;
+  border-color: #ff6600;
+  color: #fff;
 }
 
 .room-note {
-  margin-top: 16px;
-  font-size: 12px;
+  margin-top: 14px;
+  font-size: 11px;
   color: #ffab00;
   background: rgba(255, 171, 0, 0.1);
   padding: 8px 12px;
@@ -479,7 +840,7 @@ body {
 .rule-num {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   width: 22px;
   height: 22px;
   background: #30363d;
@@ -494,6 +855,148 @@ body {
 .rule-num.gold {
   background: #ffc107;
   color: #000000;
+}
+
+/* ADMIN PANEL */
+.admin-card {
+  background: rgba(22, 27, 34, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.admin-card.danger-card {
+  border-color: rgba(255, 68, 68, 0.35);
+  background: rgba(30, 15, 15, 0.9);
+}
+
+.admin-card h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.admin-card-desc {
+  font-size: 11px;
+  color: #8b949e;
+  margin: 3px 0 10px;
+}
+
+.form-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.form-row input {
+  flex: 1;
+  padding: 9px 10px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+}
+
+.form-row input:focus {
+  border-color: #ff8800;
+}
+
+.admin-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn.primary {
+  background: #ff6600;
+  color: #ffffff;
+}
+
+.admin-btn.secondary {
+  background: #30363d;
+  color: #ffffff;
+  width: auto;
+  white-space: nowrap;
+}
+
+.admin-btn.danger {
+  background: #ff4444;
+  color: #ffffff;
+}
+
+.admin-stage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.admin-stage-btn {
+  padding: 10px 6px;
+  background: #1c2128;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-stage-btn:hover {
+  border-color: #ff8800;
+}
+
+.admin-stage-btn.gold {
+  grid-column: span 2;
+  background: rgba(255, 193, 7, 0.15);
+  border-color: #ffc107;
+  color: #ffc107;
+  font-weight: 700;
+}
+
+.admin-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.admin-slot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.admin-slot-row .nick {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.admin-kick-btn {
+  background: rgba(255, 68, 68, 0.2);
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  color: #ff5252;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 /* MODAL */
@@ -636,8 +1139,8 @@ body {
 }
 
 .trophy-icon {
-  font-size: 60px;
-  margin-bottom: 10px;
+  font-size: 54px;
+  margin-bottom: 8px;
   animation: bounce 1s infinite alternate;
 }
 
@@ -648,24 +1151,24 @@ body {
 
 .banner-box h2 {
   font-family: 'Teko', sans-serif;
-  font-size: 32px;
+  font-size: 30px;
   color: #ffc107;
   letter-spacing: 1px;
 }
 
 .winner-nick {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   color: #ffffff;
-  margin: 10px 0;
+  margin: 8px 0;
   text-shadow: 0 0 10px #ff9900;
 }
 
 .banner-box p {
   font-size: 12px;
   color: #ffecb3;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .close-banner-btn {
@@ -676,4 +1179,26 @@ body {
   padding: 8px 24px;
   border-radius: 20px;
   cursor: pointer;
+}
+
+/* TOAST NOTIFICATION */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(0, 230, 118, 0.95);
+  color: #000000;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
 }

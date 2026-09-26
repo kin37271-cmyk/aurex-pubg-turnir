@@ -23,9 +23,13 @@ async def init_db():
             )
         """)
 
-        # Migration: slot_price ustuni mavjud bo'lmasa qo'shish
+        # Migration: slot_price va winner_nick ustunlari mavjud bo'lmasa qo'shish
         try:
             await db.execute("ALTER TABLE tournament ADD COLUMN slot_price INTEGER DEFAULT 0")
+        except Exception:
+            pass
+        try:
+            await db.execute("ALTER TABLE tournament ADD COLUMN winner_nick TEXT DEFAULT NULL")
         except Exception:
             pass
         
@@ -100,15 +104,27 @@ async def get_tournament() -> Dict[str, Any]:
             row = await cursor.fetchone()
             return dict(row) if row else {}
 
-async def update_tournament_stage(status: str, stage_name: str, start_date: Optional[str] = None):
+async def update_tournament_stage(status: str, stage_name: str, start_date: Optional[str] = None, winner_nick: Optional[str] = None):
     """Turnir bosqichini yangilash"""
     async with aiosqlite.connect(DB_PATH) as db:
-        if start_date:
+        if start_date and winner_nick:
+            await db.execute("""
+                UPDATE tournament 
+                SET status = ?, stage_name = ?, start_date = ?, winner_nick = ? 
+                WHERE id = (SELECT MAX(id) FROM tournament)
+            """, (status, stage_name, start_date, winner_nick))
+        elif start_date:
             await db.execute("""
                 UPDATE tournament 
                 SET status = ?, stage_name = ?, start_date = ? 
                 WHERE id = (SELECT MAX(id) FROM tournament)
             """, (status, stage_name, start_date))
+        elif winner_nick:
+            await db.execute("""
+                UPDATE tournament 
+                SET status = ?, stage_name = ?, winner_nick = ? 
+                WHERE id = (SELECT MAX(id) FROM tournament)
+            """, (status, stage_name, winner_nick))
         else:
             await db.execute("""
                 UPDATE tournament 

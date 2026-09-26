@@ -62,10 +62,14 @@ def get_admin_panel_inline() -> InlineKeyboardMarkup:
     ])
 
 def get_webapp_inline_keyboard(webapp_url: str) -> InlineKeyboardMarkup:
-    """Foydalanuvchini Web App ga yo'naltiruvchi asosiy tugma"""
+    """Foydalanuvchini Web App ga yo'naltiruvchi yagona AUREX TURNIR tugmasi"""
     from aiogram.types import WebAppInfo
+    if webapp_url and webapp_url.startswith("https://"):
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🎮 AUREX TURNIR", web_app=WebAppInfo(url=webapp_url))]
+        ])
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🚀 TURNIR WEB APP'NI OCHISH 🎮", web_app=WebAppInfo(url=webapp_url))]
+        [InlineKeyboardButton(text="🎮 AUREX TURNIR", url=webapp_url or "https://t.me")]
     ])
 
 def get_confirm_reset_inline() -> InlineKeyboardMarkup:

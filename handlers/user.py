@@ -400,3 +400,20 @@ async def callback_refresh_my_slot(callback: CallbackQuery):
         await callback.answer("Ma'lumotlar yangilandi 🔄")
     except Exception:
         await callback.answer("O'zgarish yo'q")
+
+
+@router.message(F.text)
+async def fallback_to_webapp(message: Message):
+    """Barcha matnli xabarlarni to'g'ridan-to'g'ri Web App ga yo'naltirish"""
+    webapp_url = get_webapp_url()
+    inline_kb = get_webapp_inline_keyboard(webapp_url) if (webapp_url and webapp_url.startswith("https://")) else None
+    reply_kb = get_main_menu(message.from_user.id)
+    
+    await message.answer(
+        "🏆 <b>Aurex PUBG Mobile Turniri</b>\n\n"
+        "Barcha amallar: <b>Slot tanlash, Mijozlar / Ishtirokchilar ro'yxati, Sizning profilingiz, Jadval va Qoidalar</b> "
+        "to'liq <b>Aurex Web App</b> ichida ishlaydi!\n\n"
+        "👇 Web App ga kirish uchun pastdagi <b>«AUREX TURNIR»</b> tugmasini bosing:",
+        reply_markup=inline_kb or reply_kb
+    )
+

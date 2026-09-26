@@ -92,7 +92,7 @@ async def main():
         try:
             await aiogram_bot.set_chat_menu_button(
                 menu_button=MenuButtonWebApp(
-                    text="🎮 Turnir Web App",
+                    text="🎮 AUREX TURNIR",
                     web_app=WebAppInfo(url=active_url)
                 )
             )
