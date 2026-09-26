@@ -18,3 +18,13 @@ def get_main_menu(user_id: int = 0) -> ReplyKeyboardMarkup:
 def get_cancel_menu() -> ReplyKeyboardMarkup:
     """Bekor qilish menyusi"""
     return get_main_menu()
+
+def get_phone_menu() -> ReplyKeyboardMarkup:
+    """Telefon raqam menyusi"""
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="📱 Kontaktni yuborish", request_contact=True)],
+            [KeyboardButton(text="❌ Bekor qilish")]
+        ],
+        resize_keyboard=True
+    )

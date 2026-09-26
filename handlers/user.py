@@ -1,5 +1,5 @@
 import os
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
