@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aurex PUBG Mobile Turnir</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- SALYUT CANVAS (Final bosqichi uchun) -->
+  <canvas id="fireworks-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-badge">
+        <span class="pulse-dot"></span>
+        <span id="stage-badge">Ro'yxatga olish</span>
+      </div>
+      <h1 class="logo-title">AUREX <span>PUBG MOBILE</span></h1>
+      <p class="tournament-name" id="tournament-title">16 Kishilik Solo Turnir</p>
+      
+      <!-- STATS BAR -->
+      <div class="stats-card">
+        <div class="stat-item">
+          <span class="stat-label">SLOT NARXI</span>
+          <span class="stat-value price" id="slot-price-display">0 so'm</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-label">ISHTIROKCHILAR</span>
+          <span class="stat-value" id="slots-count-display">0 / 16</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-label">G'OLIB</span>
+          <span class="stat-value gold">Faqat 1-O'rin</span>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="progress-container">
+        <div class="progress-bar" id="slots-progress" style="width: 0%"></div>
+      </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="slots-tab">
+        <span class="tab-icon">🎮</span>
+        <span class="tab-text">Slotlar</span>
+      </button>
+      <button class="nav-tab" data-tab="schedule-tab">
+        <span class="tab-icon">🗓</span>
+        <span class="tab-text">Jadval</span>
+      </button>
+      <button class="nav-tab" data-tab="room-tab">
+        <span class="tab-icon">🚪</span>
+        <span class="tab-text">Xona</span>
+      </button>
+      <button class="nav-tab" data-tab="rules-tab">
+        <span class="tab-icon">ℹ️</span>
+        <span class="tab-text">Qoidalar</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: 16 TA SLOT GRID -->
+    <section id="slots-tab" class="tab-content active">
+      <div class="section-header">
+        <h2>16 TA SLOT PANJARASI</h2>
+        <span class="section-sub">Bo'sh slotni tanlab, turnirga yoziling</span>
+      </div>
+      <div class="slots-grid" id="slots-grid-container">
+        <!-- 16 ta slot javascript orqali yuklanadi -->
+        <div class="loading-spinner">Slotlar yuklanmoqda...</div>
+      </div>
+    </section>
+
+    <!-- TAB 2: JADVAL (Har 2 kunda 2 ta o'yin) -->
+    <section id="schedule-tab" class="tab-content">
+      <div class="section-header">
+        <h2>O'YINLAR JADVALI</h2>
+        <span class="section-sub">Tartib: Har 2 kunda 2 ta o'yin Custom Room'da</span>
+      </div>
+      <div class="schedule-list" id="schedule-container">
+        <div class="schedule-item active-day">
+          <div class="schedule-badge">1-BOSQICH</div>
+          <div class="schedule-info">
+            <h3>Chorak Final (1-qism)</h3>
+            <p>1-o'yin: 20:00 | 2-o'yin: 21:00</p>
+          </div>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-badge">1-BOSQICH</div>
+          <div class="schedule-info">
+            <h3>Chorak Final (2-qism)</h3>
+            <p>2 kundan so'ng • 1-o'yin: 20:00 | 2-o'yin: 21:00</p>
+          </div>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-badge">2-BOSQICH</div>
+          <div class="schedule-info">
+            <h3>Yarim Final</h3>
+            <p>Yana 2 kundan so'ng • 1-o'yin: 20:00 | 2-o'yin: 21:00</p>
+          </div>
+        </div>
+        <div class="schedule-item final-day">
+          <div class="schedule-badge gold">GRAND FINAL</div>
+          <div class="schedule-info">
+            <h3>🏆 GRAND FINAL & SALYUT!</h3>
+            <p>Yagona Chempionni aniqlash • 20:00 va 21:00</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: XONA MA'LUMOTLARI -->
+    <section id="room-tab" class="tab-content">
+      <div class="section-header">
+        <h2>PUBG MOBILE CUSTOM ROOM</h2>
+        <span class="section-sub">O'yin kuni xona ID va paroli shu yerda chiqadi</span>
+      </div>
+      <div class="room-card" id="room-info-card">
+        <div class="room-icon">🚪</div>
+        <h3 id="room-status-title">Xona hali ochilmagan</h3>
+        <p id="room-status-desc">Turnir boshlanishidan 10 daqiqa oldin Room ID va Parol beriladi.</p>
+        <div class="room-credentials" id="room-creds" style="display: none;">
+          <div class="cred-box">
+            <span class="cred-label">ROOM ID</span>
+            <span class="cred-val" id="room-id-val">------</span>
+          </div>
+          <div class="cred-box">
+            <span class="cred-label">PAROL</span>
+            <span class="cred-val" id="room-pass-val">----</span>
+          </div>
+        </div>
+        <div class="room-note">
+          ⚠️ <b>Diqqat:</b> PUBG Mobile ilovasida faqat o'zingiz band qilgan slot raqamiga o'tiring!
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: QOIDALAR -->
+    <section id="rules-tab" class="tab-content">
+      <div class="section-header">
+        <h2>TURNIR QOIDALARI</h2>
+        <span class="section-sub">Aurex PUBG Mobile reglamenti</span>
+      </div>
+      <div class="rules-card">
+        <div class="rule-row">
+          <span class="rule-num">1</span>
+          <p><b>Ishtirokchilar:</b> Turnirda jami 16 ta o'yinchi (Solo) qatnashadi.</p>
+        </div>
+        <div class="rule-row highlight">
+          <span class="rule-num gold">2</span>
+          <p><b>Faqat 1-O'rin:</b> Turnirda kill hisoblanmaydi! Oxirgi tirik qolgan (Top-1) yagona chempion bo'ladi!</p>
+        </div>
+        <div class="rule-row">
+          <span class="rule-num">3</span>
+          <p><b>Tartib:</b> O'yinlar har 2 kunda 2 tadan PUBG Mobile maxsus xonasida o'ynaladi.</p>
+        </div>
+        <div class="rule-row">
+          <span class="rule-num">4</span>
+          <p><b>Slot intizomi:</b> Har bir o'yinchi faqat o'z slotida o'ynashi shart. Begona slotga o'tirish kick qilinadi.</p>
+        </div>
+        <div class="rule-row">
+          <span class="rule-num">5</span>
+          <p><b>Halol o'yin:</b> Chiterlik, emulyator (PC) va teaming qat'iyan man etiladi.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL: SLOTNI BAND QILISH -->
+    <div class="modal-overlay" id="book-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-slot-title">SLOT #01 BAND QILISH</h3>
+          <button class="modal-close" id="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-price-box">
+          <span>Slot to'lovi:</span>
+          <strong id="modal-slot-price">0 so'm</strong>
+        </div>
+        <form id="book-form">
+          <input type="hidden" id="modal-slot-num" value="">
+          <div class="form-group">
+            <label for="input-pubg-nick">PUBG NICKNAME *</label>
+            <input type="text" id="input-pubg-nick" placeholder="O'yindagi aniq nikingiz" required>
+          </div>
+          <div class="form-group">
+            <label for="input-pubg-id">PUBG ID RAQAMI *</label>
+            <input type="number" id="input-pubg-id" placeholder="Masalan: 5123456789" required>
+          </div>
+          <div class="form-group">
+            <label for="input-phone">TELEFON RAQAM (Ixtiyoriy)</label>
+            <input type="tel" id="input-phone" placeholder="+998 90 123 45 67">
+          </div>
+          <button type="submit" class="submit-btn" id="book-submit-btn">
+            TASDIQLASH VA BAND QILISH
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- GRAND FINAL SALYUT BANNER (G'olib aniqlanganda) -->
+    <div class="fireworks-banner" id="fireworks-banner" style="display: none;">
+      <div class="banner-box">
+        <div class="trophy-icon">🏆</div>
+        <h2>GRAND FINAL CHEMPIONI!</h2>
+        <div class="winner-nick" id="banner-winner-nick">PLAYER</div>
+        <p>1-O'RIN SOVRINDORI VA MUTLAQ G'OLIB</p>
+        <button class="close-banner-btn" onclick="document.getElementById('fireworks-banner').style.display='none'">Yopish</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
