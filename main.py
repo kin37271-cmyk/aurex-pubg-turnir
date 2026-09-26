@@ -51,6 +51,25 @@ async def main():
     aiogram_bot = Bot(token=BOT_TOKEN, default=bot)
     dp = Dispatcher(storage=MemoryStorage())
 
+    # Botning Tavsifi (Description) va Bio (Short Description) sozlash
+    try:
+        await aiogram_bot.set_my_description(
+            description=(
+                "🏆 AUREX PUBG MOBILE TURNIR BOTI & WEB APP\n\n"
+                "🎮 16 kishilik maxsus PUBG Mobile Custom Room turnirlari.\n"
+                "⏱ O'yinlar har 2 kunda 2 ta o'yin tartibida o'tkaziladi.\n"
+                "👑 Faqat 1-O'rin (Top-1 Winner) — kill hisoblanmaydi!\n"
+                "🚪 Xona ID va Parol faqat 16 ishtirokchiga shaxsiy yuboriladi.\n\n"
+                "Turnirga qatnashish va slot band qilish uchun /start bosing!"
+            )
+        )
+        await aiogram_bot.set_my_short_description(
+            short_description="🏆 Aurex PUBG Mobile 16 Kishilik Turnir Boshqaruvchi Boti & Web App 🎮"
+        )
+        logger.info("📝 Bot tavsifi (description) va Bio muvaffaqiyatli sozlandi!")
+    except Exception as e:
+        logger.warning(f"Bot tavsifini sozlashda xato: {e}")
+
     # Telegram Menu tugmasini sozlash (Web App uchun)
     if WEBAPP_URL and WEBAPP_URL.startswith("https://"):
         try:

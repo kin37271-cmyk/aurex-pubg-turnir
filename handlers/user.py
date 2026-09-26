@@ -1,5 +1,6 @@
+import os
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 
@@ -55,13 +56,21 @@ async def cmd_start(message: Message, state: FSMContext):
         f"👇 <b>Turnirga kirish uchun pastdagi tugmani bosing:</b>"
     )
 
-    if WEBAPP_URL and WEBAPP_URL.startswith("https://"):
-        await message.answer(
-            welcome_text,
-            reply_markup=get_webapp_inline_keyboard(WEBAPP_URL)
+    banner_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "banner.jpg")
+    reply_markup = get_webapp_inline_keyboard(WEBAPP_URL) if (WEBAPP_URL and WEBAPP_URL.startswith("https://")) else get_main_menu(user_id)
+
+    if os.path.exists(banner_path):
+        photo = FSInputFile(banner_path)
+        await message.answer_photo(
+            photo=photo,
+            caption=welcome_text,
+            reply_markup=reply_markup
         )
     else:
-        await message.answer(welcome_text, reply_markup=get_main_menu(user_id))
+        await message.answer(
+            welcome_text,
+            reply_markup=reply_markup
+        )
 
 @router.message(F.text == "❌ Bekor qilish")
 async def cancel_handler(message: Message, state: FSMContext):
