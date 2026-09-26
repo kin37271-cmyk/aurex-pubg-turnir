@@ -150,34 +150,51 @@ async function loadTournament() {
     if (!res.ok) return;
     tournamentData = await res.json();
 
-    document.getElementById('tournament-title').innerText = tournamentData.title || 'Aurex PUBG Mobile Turniri';
-    document.getElementById('stage-badge').innerText = tournamentData.stage_name || "Ro'yxatga olish";
+    const titleEl = document.getElementById('tournament-title');
+    if (titleEl) titleEl.innerText = tournamentData.title || 'Aurex PUBG Mobile Turniri';
+
+    const stageEl = document.getElementById('stage-badge');
+    if (stageEl) stageEl.innerText = tournamentData.stage_name || "Ro'yxatga olish";
 
     // Slot Price
     const price = tournamentData.slot_price || 0;
     const priceFormatted = price > 0 ? `${price.toLocaleString()} so'm` : "BEPUL / TEKIN";
-    document.getElementById('slot-price-display').innerText = priceFormatted;
-    document.getElementById('modal-slot-price').innerText = priceFormatted;
+    const priceDisp = document.getElementById('slot-price-display');
+    if (priceDisp) priceDisp.innerText = priceFormatted;
+    const modalPrice = document.getElementById('modal-slot-price');
+    if (modalPrice) modalPrice.innerText = priceFormatted;
+
+    // Card info
+    const cardNum = document.getElementById('modal-card-num');
+    if (cardNum && tournamentData.card_number) cardNum.innerText = tournamentData.card_number;
 
     // Room info
+    const roomTitle = document.getElementById('room-status-title');
+    const roomDesc = document.getElementById('room-status-desc');
+    const roomCreds = document.getElementById('room-creds');
+    const roomIdVal = document.getElementById('room-id-val');
+    const roomPassVal = document.getElementById('room-pass-val');
+
     if (tournamentData.room_id && tournamentData.room_password) {
-      document.getElementById('room-status-title').innerText = "🔥 XONA OCHILGAN!";
-      document.getElementById('room-status-desc').innerText = "PUBG Mobile ilovasida pastdagi ID va parol orqali xonaga kiring:";
-      document.getElementById('room-id-val').innerText = tournamentData.room_id;
-      document.getElementById('room-pass-val').innerText = tournamentData.room_password;
-      document.getElementById('room-creds').style.display = 'grid';
+      if (roomTitle) roomTitle.innerText = "🔥 XONA OCHILGAN!";
+      if (roomDesc) roomDesc.innerText = "PUBG Mobile ilovasida pastdagi ID va parol orqali xonaga kiring:";
+      if (roomIdVal) roomIdVal.innerText = tournamentData.room_id;
+      if (roomPassVal) roomPassVal.innerText = tournamentData.room_password;
+      if (roomCreds) roomCreds.style.display = 'grid';
     } else {
-      document.getElementById('room-status-title').innerText = "Xona hali ochilmagan";
-      document.getElementById('room-status-desc').innerText = "Turnir boshlanishidan 10 daqiqa oldin Room ID va Parol beriladi.";
-      document.getElementById('room-creds').style.display = 'none';
+      if (roomTitle) roomTitle.innerText = "Xona hali ochilmagan";
+      if (roomDesc) roomDesc.innerText = "Turnir boshlanishidan 10 daqiqa oldin Room ID va Parol beriladi.";
+      if (roomCreds) roomCreds.style.display = 'none';
     }
 
     // Grand Final fireworks
     if (tournamentData.status === 'final') {
       startFireworks();
       if (tournamentData.winner_nick) {
-        document.getElementById('banner-winner-nick').innerText = tournamentData.winner_nick;
-        document.getElementById('fireworks-banner').style.display = 'flex';
+        const winnerBannerNick = document.getElementById('banner-winner-nick');
+        if (winnerBannerNick) winnerBannerNick.innerText = tournamentData.winner_nick;
+        const fireworksBanner = document.getElementById('fireworks-banner');
+        if (fireworksBanner) fireworksBanner.style.display = 'flex';
       }
     }
 
@@ -909,17 +926,17 @@ function startFireworks() {
 // 10. INITIALIZATION & POLLING
 // ==========================================
 async function init() {
-  await checkAdminStatus();
-  await loadTournament();
-  await loadSlots();
-  await loadPlayers();
-  await loadProfile();
+  try { await checkAdminStatus(); } catch (e) { console.error("checkAdminStatus error:", e); }
+  try { await loadTournament(); } catch (e) { console.error("loadTournament error:", e); }
+  try { await loadSlots(); } catch (e) { console.error("loadSlots error:", e); }
+  try { await loadPlayers(); } catch (e) { console.error("loadPlayers error:", e); }
+  try { await loadProfile(); } catch (e) { console.error("loadProfile error:", e); }
 
   // Periodic refresh every 6 seconds
   setInterval(async () => {
-    await loadTournament();
-    await loadSlots();
-    await loadPlayers();
+    try { await loadTournament(); } catch (e) {}
+    try { await loadSlots(); } catch (e) {}
+    try { await loadPlayers(); } catch (e) {}
   }, 6000);
 }
 
