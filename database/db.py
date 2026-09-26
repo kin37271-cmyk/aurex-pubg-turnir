@@ -200,11 +200,13 @@ async def book_slot(
             if not row or row[0] is not None:
                 return False
         
-        # Foydalanuvchi oldin boshqa slot olmaganligini tekshiramiz
-        async with db.execute("SELECT slot_number FROM slots WHERE user_id = ?", (user_id,)) as cursor:
-            existing = await cursor.fetchone()
-            if existing:
-                return False
+        # Foydalanuvchi oldin boshqa slot olmaganligini tekshiramiz (user_id mavjud bo'lsa)
+        if user_id and user_id > 0:
+            async with db.execute("SELECT slot_number FROM slots WHERE user_id = ?", (user_id,)) as cursor:
+                existing = await cursor.fetchone()
+                if existing:
+                    return False
+
 
         await db.execute("""
             UPDATE slots SET 

@@ -18,7 +18,39 @@ CHANNEL_ID = os.getenv("CHANNEL_ID", "")
 # Telegram Web App manzili (HTTPS bo'lishi shart)
 WEBAPP_URL = os.getenv("WEBAPP_URL", "")
 
+def get_webapp_url() -> str:
+    """Hozirgi aktiv Web App manzilini qaytarish"""
+    return os.getenv("WEBAPP_URL", WEBAPP_URL)
+
+def set_webapp_url(new_url: str):
+    """Web App manzilini yangilash va .env fayliga saqlash"""
+    global WEBAPP_URL
+    WEBAPP_URL = new_url
+    os.environ["WEBAPP_URL"] = new_url
+    
+    # .env faylini avtomatik yangilash
+    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            found = False
+            new_lines = []
+            for line in lines:
+                if line.startswith("WEBAPP_URL=") or line.strip() == "WEBAPP_URL":
+                    new_lines.append(f"WEBAPP_URL={new_url}\n")
+                    found = True
+                else:
+                    new_lines.append(line)
+            if not found:
+                new_lines.append(f"WEBAPP_URL={new_url}\n")
+            with open(env_file, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+        except Exception:
+            pass
+
 # Turnir qoidalari
+
 DEFAULT_RULES = """
 🏆 <b>AUREX PUBG MOBILE TURNIR QOIDALARI</b>
 

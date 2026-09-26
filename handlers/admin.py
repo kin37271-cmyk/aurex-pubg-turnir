@@ -5,7 +5,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
-from config import ADMIN_IDS, CHANNEL_ID
+from config import ADMIN_IDS, CHANNEL_ID, get_webapp_url
 from database import (
     get_all_slots,
     get_slot,
@@ -69,8 +69,23 @@ async def cmd_admin_panel(message: Message, state: FSMContext):
 
     await message.answer(text, reply_markup=get_admin_panel_inline())
 
+@router.callback_query(F.data == "admin_open_registration")
+async def callback_admin_open_registration(callback: CallbackQuery):
+    """Ro'yxatga olish bosqichini qayta ochish"""
+    if not is_admin(callback.from_user.id):
+        return
+
+    await update_tournament_stage("registration", "Ro'yxatga olish")
+    await callback.message.answer(
+        "✅ <b>TURNIRGA RO'YXATGA OLISH OCHILDI!</b>\n\n"
+        "🎮 Endi barcha ishtirokchilar Bot va Web App orqali erkin slot band qilishlari mumkin.",
+        reply_markup=get_main_menu(callback.from_user.id)
+    )
+    await callback.answer("Ro'yxatga olish ochildi!", show_alert=True)
+
 @router.callback_query(F.data == "admin_post_channel")
 async def callback_admin_post_channel(callback: CallbackQuery, bot: Bot):
+
     """Kanalga odam yig'ish va turnir holati postini yuborish"""
     if not is_admin(callback.from_user.id):
         await callback.answer("Ruxsat yo'q!", show_alert=True)
@@ -99,8 +114,9 @@ async def callback_admin_post_channel(callback: CallbackQuery, bot: Bot):
         await bot.send_message(
             chat_id=CHANNEL_ID,
             text=post_text,
-            reply_markup=get_channel_button(bot_info.username)
+            reply_markup=get_channel_button(bot_info.username, get_webapp_url())
         )
+
         await callback.answer("✅ Kanalga post muvaffaqiyatli yuborildi!", show_alert=True)
     except Exception as e:
         await callback.answer(f"❌ Kanalga yuborishda xatolik: {e}", show_alert=True)

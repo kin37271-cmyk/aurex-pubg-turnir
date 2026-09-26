@@ -1,13 +1,15 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
-from config import ADMIN_IDS, WEBAPP_URL
+from config import ADMIN_IDS, get_webapp_url
 
 def get_main_menu(user_id: int) -> ReplyKeyboardMarkup:
     """Asosiy foydalanuvchi menyusi"""
     buttons = []
     
     # Agar WEBAPP_URL sozlangan bo'lsa, birinchi qatorda katta Web App tugmasi
-    if WEBAPP_URL and WEBAPP_URL.startswith("https://"):
-        buttons.append([KeyboardButton(text="🚀 TURNIR WEB APP (16/16) 🎮", web_app=WebAppInfo(url=WEBAPP_URL))])
+    webapp_url = get_webapp_url()
+    if webapp_url and webapp_url.startswith("https://"):
+        buttons.append([KeyboardButton(text="🚀 TURNIR WEB APP (16/16) 🎮", web_app=WebAppInfo(url=webapp_url))])
+
     
     buttons.append([KeyboardButton(text="🎮 Turnirga qatnashish"), KeyboardButton(text="📋 16 ta Ishtirokchi")])
     buttons.append([KeyboardButton(text="🗓 O'yinlar jadvali"), KeyboardButton(text="👤 Mening slotim")])

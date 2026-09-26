@@ -39,8 +39,10 @@ def get_admin_panel_inline() -> InlineKeyboardMarkup:
     """Admin boshqaruv paneli tugmalari"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="🚀 O'yinni start qilish (Har 2 kunda 2 ta)", callback_data="admin_start_tournament")
+            InlineKeyboardButton(text="📝 Ro'yxatga olishni ochish (Open)", callback_data="admin_open_registration"),
+            InlineKeyboardButton(text="🚀 O'yinni start qilish", callback_data="admin_start_tournament")
         ],
+
         [
             InlineKeyboardButton(text="⚔️ Chorak final e'loni", callback_data="admin_announce_quarter"),
             InlineKeyboardButton(text="🏆 FINAL & SALYUT 🎆", callback_data="admin_trigger_final")

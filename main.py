@@ -16,10 +16,11 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import MenuButtonWebApp, WebAppInfo
 
-from config import BOT_TOKEN, ADMIN_IDS, CHANNEL_ID, WEBAPP_URL
+from config import BOT_TOKEN, ADMIN_IDS, CHANNEL_ID, get_webapp_url, set_webapp_url
 from database import init_db
 from handlers import user_router, admin_router
 from webapp import start_webapp_server
+from utils import CloudflareTunnelManager
 
 logging.basicConfig(
     level=logging.INFO,
@@ -47,6 +48,22 @@ async def main():
     webapp_runner = await start_webapp_server(host="0.0.0.0", port=web_port)
     logger.info(f"✅ Web App server tayyor: http://localhost:{web_port}")
 
+    # Cloudflare Tunnelni boshqarish
+    tunnel_mgr = None
+    active_url = get_webapp_url()
+    auto_tunnel_env = os.getenv("AUTO_TUNNEL", "true").lower()
+
+    if auto_tunnel_env in ("true", "1", "yes"):
+        # Agar WEBAPP_URL bo'sh bo'lsa yoki trycloudflare bo'lsa, avtomatik tunnel ochish
+        is_trycloudflare = (not active_url) or ("trycloudflare.com" in active_url)
+        if is_trycloudflare:
+            tunnel_mgr = CloudflareTunnelManager(port=web_port)
+            if tunnel_mgr.is_available():
+                tunnel_url = await tunnel_mgr.start()
+                if tunnel_url:
+                    set_webapp_url(tunnel_url)
+                    active_url = tunnel_url
+
     bot = DefaultBotProperties(parse_mode=ParseMode.HTML)
     aiogram_bot = Bot(token=BOT_TOKEN, default=bot)
     dp = Dispatcher(storage=MemoryStorage())
@@ -71,15 +88,15 @@ async def main():
         logger.warning(f"Bot tavsifini sozlashda xato: {e}")
 
     # Telegram Menu tugmasini sozlash (Web App uchun)
-    if WEBAPP_URL and WEBAPP_URL.startswith("https://"):
+    if active_url and active_url.startswith("https://"):
         try:
             await aiogram_bot.set_chat_menu_button(
                 menu_button=MenuButtonWebApp(
                     text="🎮 Turnir Web App",
-                    web_app=WebAppInfo(url=WEBAPP_URL)
+                    web_app=WebAppInfo(url=active_url)
                 )
             )
-            logger.info(f"📱 Web App Menu tugmasi sozlandi: {WEBAPP_URL}")
+            logger.info(f"📱 Web App Menu tugmasi sozlandi: {active_url}")
         except Exception as e:
             logger.warning(f"Menu tugmasini sozlashda ogohlantirish: {e}")
 
@@ -88,14 +105,20 @@ async def main():
     dp.include_router(user_router)
 
     bot_info = await aiogram_bot.get_me()
-    logger.info(f"🚀 Aurex PUBG Bot ishga tushdi: @{bot_info.username}")
-    logger.info(f"🛡️ Adminlar: {ADMIN_IDS}")
-    logger.info(f"📢 Kanal: {CHANNEL_ID or 'Sozlanmagan'}")
-    logger.info(f"🌐 Web App URL: {WEBAPP_URL or 'Hali sozlanmagan'}")
+    print("\n" + "=" * 60)
+    print("🏆  AUREX PUBG MOBILE TURNIR BOTI VA WEB APP ISHGA TUSHDI!  🏆")
+    print("=" * 60)
+    print(f"🤖 Telegram Bot:   @{bot_info.username}")
+    print(f"🌐 Web App URL:    {active_url or 'Sozlanmagan'}")
+    print(f"🛡️ Adminlar soni:  {len(ADMIN_IDS)}")
+    print(f"📢 Kanal:          {CHANNEL_ID or 'Sozlanmagan'}")
+    print("=" * 60 + "\n")
 
     try:
         await dp.start_polling(aiogram_bot, allowed_updates=dp.resolve_used_update_types())
     finally:
+        if tunnel_mgr:
+            await tunnel_mgr.stop()
         await webapp_runner.cleanup()
         await aiogram_bot.session.close()
 

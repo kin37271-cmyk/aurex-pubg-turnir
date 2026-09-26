@@ -23,9 +23,10 @@ from keyboards import (
 )
 from states import RegistrationStates
 from utils import format_slots_text, format_schedule_text
-from config import DEFAULT_RULES, WEBAPP_URL
+from config import DEFAULT_RULES, get_webapp_url
 
 router = Router()
+
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
@@ -57,20 +58,28 @@ async def cmd_start(message: Message, state: FSMContext):
     )
 
     banner_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "banner.jpg")
-    reply_markup = get_webapp_inline_keyboard(WEBAPP_URL) if (WEBAPP_URL and WEBAPP_URL.startswith("https://")) else get_main_menu(user_id)
+    webapp_url = get_webapp_url()
+    inline_kb = get_webapp_inline_keyboard(webapp_url) if (webapp_url and webapp_url.startswith("https://")) else None
 
     if os.path.exists(banner_path):
         photo = FSInputFile(banner_path)
         await message.answer_photo(
             photo=photo,
             caption=welcome_text,
-            reply_markup=reply_markup
+            reply_markup=inline_kb
         )
     else:
         await message.answer(
             welcome_text,
-            reply_markup=reply_markup
+            reply_markup=inline_kb
         )
+
+    # Foydalanuvchida asosiy menyu tugmalari ham doim ko'rinib turishi uchun
+    await message.answer(
+        "👇 Asosiy bo'limlar menyusi:",
+        reply_markup=get_main_menu(user_id)
+    )
+
 
 @router.message(F.text == "❌ Bekor qilish")
 async def cancel_handler(message: Message, state: FSMContext):
